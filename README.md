@@ -1,8 +1,8 @@
-# Falling-Star-Game
+# Falling-Star-Game ⭐
 An interactive browser game built with HTML5, CSS3, and JavaScript where players catch falling stars to build their score.
-# Catch the Falling Stars ⭐
+## Catch the Falling Stars 
 
-An interactive 2D browser mini-game developed as part of the **CSE 479: Web Programming** course at **East West University**.
+An interactive 2D browser mini-game developed by Subha.
 
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
