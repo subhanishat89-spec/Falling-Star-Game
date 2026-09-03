@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Catch the Falling Stars</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+color:white;
+text-align:center;
+overflow:hidden;
+}
+
+h1{
+margin-top:10px;
+}
+
+#starBackground{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+z-index:-1;
+overflow:hidden;
+}
+
+.bgStar{
+position:absolute;
+width:3px;
+height:3px;
+background:white;
+border-radius:50%;
+opacity:0.8;
+animation:moveStars linear infinite;
+}
+
+@keyframes moveStars{
+from{
+transform:translateY(-10px);
+}
+to{
+transform:translateY(110vh);
+}
+}
+
+#gameArea{
+width:650px;
+height:520px;
+border:3px solid white;
+margin:auto;
+position:relative;
+overflow:hidden;
+background:rgba(0,0,0,0.35);
+}
+
+#basket{
+width:90px;
+height:40px;
+background:orange;
+position:absolute;
+bottom:10px;
+left:280px;
+border-radius:10px;
+box-shadow:0 0 10px yellow;
+}
+
+.star{
+width:28px;
+height:28px;
+background:yellow;
+position:absolute;
+top:0;
+border-radius:50%;
+box-shadow:0 0 10px yellow;
+}
+
+.bonus{
+background:gold;
+box-shadow:0 0 15px gold;
+}
+
+#panel{
+font-size:18px;
+margin-bottom:10px;
+}
+
+button{
+padding:10px 20px;
+font-size:16px;
+border:none;
+border-radius:5px;
+cursor:pointer;
+background:#00c6ff;
+color:white;
+}
+
+button:hover{
+background:#0096c7;
+}
+
+#gameOver{
+display:none;
+position:absolute;
+top:200px;
+left:50%;
+transform:translateX(-50%);
+background:black;
+padding:20px;
+border-radius:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+ 
+<div id="starBackground"></div>
+
+<h1>⭐ Catch the Falling Stars ⭐</h1>
+
+<div id="panel">
+Score: <span id="score">0</span> |
+Lives: <span id="lives">3</span>
+</div>
+
+<button id="startBtn" onclick="startGame()">Start Game</button>
+
+<div id="gameArea">
+
+<div id="basket"></div>
+
+<div id="gameOver">
+<h2>Game Over</h2>
+<p>Your Score: <span id="finalScore"></span></p>
+<button onclick="restart()">Play Again</button>
+</div>
+
+</div>
+
+<script>
+
+let basket=document.getElementById("basket")
+let gameArea=document.getElementById("gameArea")
+let startBtn=document.getElementById("startBtn")
+
+let score=0
+let lives=3
+let basketX=280
+
+let gameRunning=false
+let spawnRate=1200
+
+let catchSound=new Audio(
+"https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"
+)
+
+document.addEventListener("keydown",moveBasket)
+
+function moveBasket(e){
+
+if(!gameRunning) return
+
+if(e.key=="ArrowLeft") basketX-=35
+if(e.key=="ArrowRight") basketX+=35
+
+if(basketX<0) basketX=0
+
+let maxRight=gameArea.clientWidth-basket.clientWidth
+if(basketX>maxRight) basketX=maxRight
+
+basket.style.left=basketX+"px"
+
+}
+
+function startGame(){
+
+if(gameRunning) return
+
+gameRunning=true
+
+startBtn.disabled=true
+startBtn.style.display="none"
+
+spawnStars()
+
+}
+
+function spawnStars(){
+
+if(!gameRunning) return
+
+createStar()
+
+setTimeout(spawnStars,spawnRate)
+
+}
+
+function createStar(){
+
+let star=document.createElement("div")
+
+star.classList.add("star")
+
+if(Math.random()<0.15){
+star.classList.add("bonus")
+}
+
+star.style.left=Math.random()*600+"px"
+
+gameArea.appendChild(star)
+
+let fall=setInterval(function(){
+
+if(!gameRunning){
+star.remove()
+clearInterval(fall)
+return
+}
+
+let top=star.offsetTop
+star.style.top=top+4+"px"
+
+let starRect=star.getBoundingClientRect()
+let basketRect=basket.getBoundingClientRect()
+
+if(
+starRect.bottom>=basketRect.top &&
+starRect.left<basketRect.right &&
+starRect.right>basketRect.left
+){
+
+if(star.classList.contains("bonus")){
+score+=5
+}else{
+score++
+}
+
+document.getElementById("score").innerText=score
+
+playCatchSound()
+
+star.remove()
+clearInterval(fall)
+
+increaseDifficulty()
+
+}
+
+if(top>490){
+
+lives--
+document.getElementById("lives").innerText=lives
+
+star.remove()
+clearInterval(fall)
+
+if(lives==0){
+endGame() 
+}
+
+}
+
+},30)
+
+}
+
+function increaseDifficulty(){
+
+if(score%10==0 && spawnRate>500){
+spawnRate-=100
+}
+
+}
+
+function endGame(){
+
+gameRunning=false
+
+document.getElementById("gameOver").style.display="block"
+document.getElementById("finalScore").innerText=score
+
+}
+
+function restart(){
+location.reload()
+}
+
+function playCatchSound(){
+catchSound.currentTime=0
+catchSound.play()
+}
+
+/* Background stars animation */
+
+function createBackgroundStars(){
+
+let container=document.getElementById("starBackground")
+
+for(let i=0;i<80;i++){
+
+let star=document.createElement("div")
+
+star.classList.add("bgStar")
+
+star.style.left=Math.random()*100+"vw"
+star.style.top=Math.random()*100+"vh"
+
+let speed=5+Math.random()*10
+star.style.animationDuration=speed+"s"
+
+container.appendChild(star)
+
+}
+
+}
+
+createBackgroundStars()
+
+</script>
+
+</body>
+</html>
